@@ -36,7 +36,11 @@ export const Login: React.FC = () => {
         if (error) throw error;
       }
     } catch (err: any) {
-      setError(err.message === 'Invalid login credentials' ? 'E-mail ou senha incorretos.' : err.message);
+      let errorMessage = err.message === 'Invalid login credentials' ? 'E-mail ou senha incorretos.' : err.message;
+      if (errorMessage.includes('Failed to fetch') || errorMessage.includes('fetch')) {
+        errorMessage = 'Erro de Conexão: Verifique se as Variáveis de Ambiente do Supabase estão configuradas na Vercel (VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY).';
+      }
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
