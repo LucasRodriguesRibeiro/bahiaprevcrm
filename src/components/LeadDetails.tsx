@@ -118,7 +118,6 @@ export const LeadDetails: React.FC<LeadDetailsProps> = ({ onViewChange, user, le
 
   const handleDelete = async () => {
     if (!lead?.id) return;
-    if (!confirm(`Tem certeza que deseja excluir o lead ${leadName}?`)) return;
     try {
       const { error } = await supabase.from('leads').delete().eq('id', lead.id);
       if (error) throw error;

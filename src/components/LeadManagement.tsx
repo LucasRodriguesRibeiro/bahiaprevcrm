@@ -57,8 +57,6 @@ export const LeadManagement: React.FC<LeadManagementProps> = ({ onViewChange, in
   };
 
   const handleDeleteLead = async (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir este lead?')) return;
-
     try {
       const { error } = await supabase
         .from('leads')
@@ -67,7 +65,6 @@ export const LeadManagement: React.FC<LeadManagementProps> = ({ onViewChange, in
 
       if (error) throw error;
       
-      alert('Lead excluído com sucesso!');
       fetchLeads();
     } catch (error: any) {
       alert('Erro ao excluir lead: ' + error.message);

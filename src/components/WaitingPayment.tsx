@@ -48,8 +48,6 @@ export const WaitingPayment: React.FC<WaitingPaymentProps> = ({ onViewChange }) 
   };
 
   const handleLiquidate = async (lead: Lead) => {
-    if (!confirm(`Deseja liquidar o contrato de ${lead.name}?`)) return;
-
     setProcessingId(lead.id);
     try {
       // 1. Criar registro na tabela de vendas
@@ -73,7 +71,6 @@ export const WaitingPayment: React.FC<WaitingPaymentProps> = ({ onViewChange }) 
 
       if (updateError) throw updateError;
 
-      alert('Contrato liquidado com sucesso!');
       fetchPendingPayments(); // Recarregar lista
     } catch (error: any) {
       alert('Erro ao liquidar contrato: ' + error.message);
