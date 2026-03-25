@@ -220,9 +220,6 @@ export const WaitingPayment: React.FC<WaitingPaymentProps> = ({ onViewChange }) 
                               )}
                               Liquidar
                             </button>
-                            <button className="p-2 text-slate-400 hover:text-slate-900 dark:hover:text-slate-50 rounded-lg transition-all">
-                              <MoreVertical size={18} />
-                            </button>
                           </div>
                         </td>
                       </tr>

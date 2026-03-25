@@ -260,10 +260,7 @@ export const LeadManagement: React.FC<LeadManagementProps> = ({ onViewChange, in
                           >
                             <Trash2 size={18} />
                           </button>
-                          <button className="p-2 text-slate-400 hover:text-slate-900 dark:hover:text-slate-50 rounded-lg transition-all">
-                            <MoreVertical size={18} />
-                          </button>
-                        </div>
+                          </div>
                       </td>
                     </tr>
                   )

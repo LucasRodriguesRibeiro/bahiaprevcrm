@@ -196,9 +196,6 @@ export const CompletedSales: React.FC<CompletedSalesProps> = ({ onViewChange }) 
                           <button className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all">
                             <Download size={18} />
                           </button>
-                          <button className="p-2 text-slate-400 hover:text-slate-900 dark:hover:text-slate-50 rounded-lg transition-all">
-                            <MoreVertical size={18} />
-                          </button>
                         </div>
                       </td>
                     </tr>
