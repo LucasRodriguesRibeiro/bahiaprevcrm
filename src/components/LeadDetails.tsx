@@ -25,9 +25,10 @@ interface LeadDetailsProps {
   onViewChange: (view: View) => void;
   user?: SupabaseUser | null;
   lead?: Lead | null;
+  onEditLead?: (lead: Lead) => void;
 }
 
-export const LeadDetails: React.FC<LeadDetailsProps> = ({ onViewChange, user, lead }) => {
+export const LeadDetails: React.FC<LeadDetailsProps> = ({ onViewChange, user, lead, onEditLead }) => {
   const timeline = [
     { date: '24/03/2026', time: '14:30', event: 'Lead cadastrado via Facebook Ads', icon: CheckCircle2, color: 'text-emerald-500' },
     { date: '24/03/2026', time: '15:15', event: 'Primeiro contato realizado via WhatsApp', icon: MessageSquare, color: 'text-blue-500' },
@@ -88,7 +89,6 @@ export const LeadDetails: React.FC<LeadDetailsProps> = ({ onViewChange, user, le
 
   const handleLiquidate = async () => {
     if (!lead) return;
-    if (!confirm(`Deseja liquidar o contrato de ${leadName}?`)) return;
 
     try {
       const { error: saleError } = await supabase
@@ -110,10 +110,21 @@ export const LeadDetails: React.FC<LeadDetailsProps> = ({ onViewChange, user, le
 
       if (updateError) throw updateError;
 
-      alert('Venda concluída com sucesso!');
       onViewChange('leads');
     } catch (error: any) {
       alert('Erro ao concluir venda: ' + error.message);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!lead?.id) return;
+    if (!confirm(`Tem certeza que deseja excluir o lead ${leadName}?`)) return;
+    try {
+      const { error } = await supabase.from('leads').delete().eq('id', lead.id);
+      if (error) throw error;
+      onViewChange('leads');
+    } catch (error: any) {
+      alert('Erro ao excluir: ' + error.message);
     }
   };
 
@@ -146,10 +157,16 @@ export const LeadDetails: React.FC<LeadDetailsProps> = ({ onViewChange, user, le
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <button className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-slate-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all shadow-sm">
+          <button 
+            onClick={() => lead && onEditLead?.(lead)}
+            className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-slate-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all shadow-sm"
+          >
             <Edit2 size={20} />
           </button>
-          <button className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all shadow-sm">
+          <button 
+            onClick={handleDelete}
+            className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all shadow-sm"
+          >
             <Trash2 size={20} />
           </button>
           <button 

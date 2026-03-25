@@ -135,7 +135,7 @@ export default function App() {
         case 'sem-resposta': return <LeadManagement onViewChange={setCurrentView} initialStatus="sem-resposta" onEditLead={(lead) => { setEditingLead(lead); setCurrentView('new-lead'); }} onViewLead={(l) => { setSelectedLead(l); setCurrentView('lead-details'); }} />;
         case 'new-lead': return <NewLead onViewChange={(v) => { setEditingLead(null); setCurrentView(v); }} lead={editingLead} />;
         case 'waiting-payment': return <WaitingPayment onViewChange={setCurrentView} />;
-        case 'lead-details': return <LeadDetails onViewChange={setCurrentView} user={session?.user} lead={selectedLead} />;
+        case 'lead-details': return <LeadDetails onViewChange={setCurrentView} user={session?.user} lead={selectedLead} onEditLead={(lead) => { setEditingLead(lead); setCurrentView('new-lead'); }} />;
         case 'completed-sales': return <CompletedSales onViewChange={setCurrentView} />;
         case 'settings': return <Settings onViewChange={setCurrentView} />;
         case 'mass-message': return <MassMessage onViewChange={setCurrentView} />;
