@@ -315,7 +315,14 @@ export const LeadDetails: React.FC<LeadDetailsProps> = ({ onViewChange, user, le
           <div className="bg-slate-900 rounded-3xl p-8 text-white relative overflow-hidden group shadow-xl shadow-slate-900/20">
             <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700"></div>
             <h3 className="font-headline text-lg font-bold mb-4">Ações Rápidas</h3>
-            <div className="space-y-3">
+            <div className="space-y-3 max-h-72 overflow-y-auto pr-2 custom-scrollbar">
+              <button 
+                onClick={() => handleStatusChange('novo')}
+                className="w-full flex items-center justify-between p-4 bg-white/10 hover:bg-white/20 rounded-2xl transition-all group/btn"
+              >
+                <span className="text-sm font-bold">Mover p/ Novo</span>
+                <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
+              </button>
               <button 
                 onClick={() => handleStatusChange('atendimento')}
                 className="w-full flex items-center justify-between p-4 bg-white/10 hover:bg-white/20 rounded-2xl transition-all group/btn"
@@ -335,6 +342,13 @@ export const LeadDetails: React.FC<LeadDetailsProps> = ({ onViewChange, user, le
                 className="w-full flex items-center justify-between p-4 bg-white/10 hover:bg-white/20 rounded-2xl transition-all group/btn"
               >
                 <span className="text-sm font-bold">Mover p/ Sem Resposta</span>
+                <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
+              </button>
+              <button 
+                onClick={() => handleStatusChange('concluida')}
+                className="w-full flex items-center justify-between p-4 bg-white/10 hover:bg-white/20 rounded-2xl transition-all group/btn"
+              >
+                <span className="text-sm font-bold">Mover p/ Concluída</span>
                 <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
               </button>
             </div>
