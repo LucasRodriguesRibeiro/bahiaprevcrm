@@ -127,7 +127,7 @@ export const LeadDetails: React.FC<LeadDetailsProps> = ({ onViewChange, user, le
 
       if (updateError) throw updateError;
 
-      onViewChange('leads');
+      onViewChange('completed-sales');
     } catch (error: any) {
       alert('Erro ao concluir venda: ' + error.message);
     }
@@ -176,6 +176,14 @@ export const LeadDetails: React.FC<LeadDetailsProps> = ({ onViewChange, user, le
       } else if (newStatus !== 'concluida' && oldStatus === 'concluida') {
         await supabase.from('sales').delete().eq('lead_id', lead.id);
       }
+      
+      // Redireciona o usuário (navegação) para o carregamento da etapa correta
+      if (newStatus === 'concluida') onViewChange('completed-sales');
+      else if (newStatus === 'pagamento') onViewChange('waiting-payment');
+      else if (newStatus === 'sem-resposta') onViewChange('sem-resposta');
+      else if (newStatus === 'atendimento') onViewChange('atendimento');
+      else onViewChange('leads');
+
     } catch (error: any) {
       setCurrentStatus(oldStatus); // Reverter em caso de erro
       alert('Erro ao atualizar status: ' + error.message);
