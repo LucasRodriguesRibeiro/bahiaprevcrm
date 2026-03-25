@@ -5,7 +5,7 @@ import {
   Download, 
   Search, 
   Filter, 
-  MoreVertical, 
+  Trash2, 
   ArrowRight,
   Calendar,
   Clock,
@@ -66,6 +66,24 @@ export const CompletedSales: React.FC<CompletedSalesProps> = ({ onViewChange }) 
       supabase.removeChannel(salesChannel);
     };
   }, []);
+
+  const handleDeleteSale = async (id: string) => {
+    try {
+      const { data } = await supabase.from('sales').select('lead_id').eq('id', id).single();
+      const leadId = data?.lead_id;
+
+      const { error } = await supabase.from('sales').delete().eq('id', id);
+      if (error) throw error;
+
+      if (leadId) {
+        // Reverte o lead para pagamento para que o Dashboard subtraia das vendas concluídas (conversão)
+        await supabase.from('leads').update({ status: 'pagamento' }).eq('id', leadId);
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert('Erro ao excluir venda: ' + err.message);
+    }
+  };
 
   const planSummary = {
     Esmeralda: sales.filter(s => s.planType === 'Esmeralda').length,
@@ -195,6 +213,12 @@ export const CompletedSales: React.FC<CompletedSalesProps> = ({ onViewChange }) 
                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all">
                             <Download size={18} />
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteSale(sale.id)}
+                            className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-all"
+                          >
+                            <Trash2 size={18} />
                           </button>
                         </div>
                       </td>
