@@ -19,9 +19,10 @@ import { User } from '@supabase/supabase-js';
 interface DashboardProps {
   onViewChange: (view: View) => void;
   user?: User | null;
+  onViewLead?: (lead: any) => void;
 }
 
-export const Dashboard: React.FC<DashboardProps> = ({ onViewChange, user }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ onViewChange, user, onViewLead }) => {
   const [salesData, setSalesData] = useState<any[]>([]);
   const [pendingLeads, setPendingLeads] = useState<any[]>([]);
   const [recentLeads, setRecentLeads] = useState<any[]>([]);
@@ -151,7 +152,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ onViewChange, user }) => {
                 <p className="text-center text-slate-500 py-10 font-medium">Nenhum lead recente encontrado.</p>
               ) : (
                 recentLeads.map((lead, i) => (
-                  <div key={i} className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors cursor-pointer group">
+                  <div 
+                    key={i} 
+                    onClick={() => onViewLead ? onViewLead(lead) : onViewChange('lead-details')}
+                    className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors cursor-pointer group"
+                  >
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 font-bold text-lg">
                         {lead.name.charAt(0)}

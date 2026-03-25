@@ -129,7 +129,7 @@ export default function App() {
   const renderView = () => {
     try {
       switch (currentView) {
-        case 'dashboard': return <Dashboard onViewChange={setCurrentView} user={session?.user} />;
+        case 'dashboard': return <Dashboard onViewChange={setCurrentView} user={session?.user} onViewLead={(l) => { setSelectedLead(l); setCurrentView('lead-details'); }} />;
         case 'leads': return <LeadManagement onViewChange={setCurrentView} onEditLead={(lead) => { setEditingLead(lead); setCurrentView('new-lead'); }} onViewLead={(l) => { setSelectedLead(l); setCurrentView('lead-details'); }} />;
         case 'atendimento': return <LeadManagement onViewChange={setCurrentView} initialStatus="atendimento" onEditLead={(lead) => { setEditingLead(lead); setCurrentView('new-lead'); }} onViewLead={(l) => { setSelectedLead(l); setCurrentView('lead-details'); }} />;
         case 'sem-resposta': return <LeadManagement onViewChange={setCurrentView} initialStatus="sem-resposta" onEditLead={(lead) => { setEditingLead(lead); setCurrentView('new-lead'); }} onViewLead={(l) => { setSelectedLead(l); setCurrentView('lead-details'); }} />;
@@ -139,7 +139,7 @@ export default function App() {
         case 'completed-sales': return <CompletedSales onViewChange={setCurrentView} />;
         case 'settings': return <Settings onViewChange={setCurrentView} />;
         case 'mass-message': return <MassMessage onViewChange={setCurrentView} />;
-        default: return <Dashboard onViewChange={setCurrentView} user={session?.user} />;
+        default: return <Dashboard onViewChange={setCurrentView} user={session?.user} onViewLead={(l) => { setSelectedLead(l); setCurrentView('lead-details'); }} />;
       }
     } catch (e: any) {
       return (
