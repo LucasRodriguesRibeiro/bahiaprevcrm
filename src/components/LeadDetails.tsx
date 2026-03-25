@@ -40,6 +40,7 @@ export const LeadDetails: React.FC<LeadDetailsProps> = ({ onViewChange, user, le
 
   const [comments, setComments] = useState<any[]>([]);
   const [newComment, setNewComment] = useState('');
+  const [currentStatus, setCurrentStatus] = useState<string>(lead?.status || 'novo');
 
   useEffect(() => {
     if (lead?.id) fetchComments();
@@ -127,6 +128,18 @@ export const LeadDetails: React.FC<LeadDetailsProps> = ({ onViewChange, user, le
     }
   };
 
+  const handleStatusChange = async (newStatus: string) => {
+    if (!lead?.id) return;
+    try {
+      setCurrentStatus(newStatus); // Atualização otimista da UI
+      const { error } = await supabase.from('leads').update({ status: newStatus }).eq('id', lead.id);
+      if (error) throw error;
+    } catch (error: any) {
+      setCurrentStatus(lead?.status || 'novo'); // Reverter em caso de erro
+      alert('Erro ao atualizar status: ' + error.message);
+    }
+  };
+
   return (
     <div className="p-8 pt-28 space-y-8 animate-in fade-in duration-500">
       <div className="flex items-center justify-between">
@@ -144,8 +157,8 @@ export const LeadDetails: React.FC<LeadDetailsProps> = ({ onViewChange, user, le
             <div>
               <h1 className="font-headline text-3xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">{leadName}</h1>
               <div className="flex items-center gap-3 mt-1">
-                <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${statusColors[lead?.status || 'novo']}`}>
-                  {statusLabels[lead?.status || 'novo']}
+                <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${statusColors[currentStatus] || statusColors['novo']}`}>
+                  {statusLabels[currentStatus] || statusLabels['novo']}
                 </span>
                 <span className="text-slate-400 text-xs font-medium flex items-center gap-1">
                   <Calendar size={14} />
@@ -303,16 +316,25 @@ export const LeadDetails: React.FC<LeadDetailsProps> = ({ onViewChange, user, le
             <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700"></div>
             <h3 className="font-headline text-lg font-bold mb-4">Ações Rápidas</h3>
             <div className="space-y-3">
-              <button className="w-full flex items-center justify-between p-4 bg-white/10 hover:bg-white/20 rounded-2xl transition-all group/btn">
-                <span className="text-sm font-bold">Enviar WhatsApp</span>
+              <button 
+                onClick={() => handleStatusChange('atendimento')}
+                className="w-full flex items-center justify-between p-4 bg-white/10 hover:bg-white/20 rounded-2xl transition-all group/btn"
+              >
+                <span className="text-sm font-bold">Mover p/ Em Atendimento</span>
                 <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
               </button>
-              <button className="w-full flex items-center justify-between p-4 bg-white/10 hover:bg-white/20 rounded-2xl transition-all group/btn">
-                <span className="text-sm font-bold">Agendar Reunião</span>
+              <button 
+                onClick={() => handleStatusChange('pagamento')}
+                className="w-full flex items-center justify-between p-4 bg-white/10 hover:bg-white/20 rounded-2xl transition-all group/btn"
+              >
+                <span className="text-sm font-bold">Mover p/ Em Pagamento</span>
                 <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
               </button>
-              <button className="w-full flex items-center justify-between p-4 bg-white/10 hover:bg-white/20 rounded-2xl transition-all group/btn">
-                <span className="text-sm font-bold">Enviar Proposta</span>
+              <button 
+                onClick={() => handleStatusChange('sem-resposta')}
+                className="w-full flex items-center justify-between p-4 bg-white/10 hover:bg-white/20 rounded-2xl transition-all group/btn"
+              >
+                <span className="text-sm font-bold">Mover p/ Sem Resposta</span>
                 <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
               </button>
             </div>
