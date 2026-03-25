@@ -20,7 +20,7 @@ async function connectToWhatsApp() {
     sock = makeWASocket({
       auth: state,
       printQRInTerminal: true,
-      logger: pino({ level: 'debug' })
+      logger: pino({ level: 'silent' })
     });
 
   sock.ev.on('connection.update', (update) => {
