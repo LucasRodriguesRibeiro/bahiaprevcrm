@@ -15,7 +15,9 @@ import {
   MoreVertical,
   Send,
   User,
-  ArrowRight
+  ArrowRight,
+  AlertCircle,
+  X
 } from 'lucide-react';
 import { View, Lead } from '../types';
 import { User as SupabaseUser } from '@supabase/supabase-js';
@@ -41,6 +43,20 @@ export const LeadDetails: React.FC<LeadDetailsProps> = ({ onViewChange, user, le
   const [comments, setComments] = useState<any[]>([]);
   const [newComment, setNewComment] = useState('');
   const [currentStatus, setCurrentStatus] = useState<string>(lead?.status || 'novo');
+
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    action: () => void;
+    type: 'danger' | 'warning' | 'info';
+  }>({
+    isOpen: false, title: '', message: '', action: () => {}, type: 'info'
+  });
+
+  const confirmAction = (title: string, message: string, action: () => void, type: 'danger' | 'warning' | 'info' = 'info') => {
+    setConfirmModal({ isOpen: true, title, message, action, type });
+  };
 
   useEffect(() => {
     if (lead?.id) fetchComments();
@@ -117,15 +133,22 @@ export const LeadDetails: React.FC<LeadDetailsProps> = ({ onViewChange, user, le
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!lead?.id) return;
-    try {
-      const { error } = await supabase.from('leads').delete().eq('id', lead.id);
-      if (error) throw error;
-      onViewChange('leads');
-    } catch (error: any) {
-      alert('Erro ao excluir: ' + error.message);
-    }
+    confirmAction(
+      'Excluir Lead',
+      `Tem certeza que deseja excluir permanentemente o lead ${leadName}? Essa ação não pode ser desfeita.`,
+      async () => {
+        try {
+          const { error } = await supabase.from('leads').delete().eq('id', lead.id);
+          if (error) throw error;
+          onViewChange('leads');
+        } catch (error: any) {
+          alert('Erro ao excluir: ' + error.message);
+        }
+      },
+      'danger'
+    );
   };
 
   const handleStatusChange = async (newStatus: string) => {
@@ -138,6 +161,15 @@ export const LeadDetails: React.FC<LeadDetailsProps> = ({ onViewChange, user, le
       setCurrentStatus(lead?.status || 'novo'); // Reverter em caso de erro
       alert('Erro ao atualizar status: ' + error.message);
     }
+  };
+
+  const promptStatusChange = (newStatus: string) => {
+    confirmAction(
+      'Atualizar Status',
+      `Deseja realmente mover o processo de ${leadName} para a etapa "${statusLabels[newStatus] || newStatus}"?`,
+      () => handleStatusChange(newStatus),
+      'info'
+    );
   };
 
   return (
@@ -182,7 +214,7 @@ export const LeadDetails: React.FC<LeadDetailsProps> = ({ onViewChange, user, le
             <Trash2 size={20} />
           </button>
           <button 
-            onClick={handleLiquidate}
+            onClick={() => confirmAction('Concluir Venda', `Deseja gerar a venda e liquidar o contrato de ${leadName}?`, handleLiquidate, 'info')}
             disabled={lead?.status === 'concluida'}
             className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-2xl font-bold text-sm hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 active:scale-95 disabled:opacity-50"
           >
@@ -317,35 +349,35 @@ export const LeadDetails: React.FC<LeadDetailsProps> = ({ onViewChange, user, le
             <h3 className="font-headline text-lg font-bold mb-4">Ações Rápidas</h3>
             <div className="space-y-3 max-h-72 overflow-y-auto pr-2 custom-scrollbar">
               <button 
-                onClick={() => handleStatusChange('novo')}
+                onClick={() => promptStatusChange('novo')}
                 className="w-full flex items-center justify-between p-4 bg-white/10 hover:bg-white/20 rounded-2xl transition-all group/btn"
               >
                 <span className="text-sm font-bold">Mover p/ Novo</span>
                 <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
               </button>
               <button 
-                onClick={() => handleStatusChange('atendimento')}
+                onClick={() => promptStatusChange('atendimento')}
                 className="w-full flex items-center justify-between p-4 bg-white/10 hover:bg-white/20 rounded-2xl transition-all group/btn"
               >
                 <span className="text-sm font-bold">Mover p/ Em Atendimento</span>
                 <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
               </button>
               <button 
-                onClick={() => handleStatusChange('pagamento')}
+                onClick={() => promptStatusChange('pagamento')}
                 className="w-full flex items-center justify-between p-4 bg-white/10 hover:bg-white/20 rounded-2xl transition-all group/btn"
               >
                 <span className="text-sm font-bold">Mover p/ Em Pagamento</span>
                 <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
               </button>
               <button 
-                onClick={() => handleStatusChange('sem-resposta')}
+                onClick={() => promptStatusChange('sem-resposta')}
                 className="w-full flex items-center justify-between p-4 bg-white/10 hover:bg-white/20 rounded-2xl transition-all group/btn"
               >
                 <span className="text-sm font-bold">Mover p/ Sem Resposta</span>
                 <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
               </button>
               <button 
-                onClick={() => handleStatusChange('concluida')}
+                onClick={() => promptStatusChange('concluida')}
                 className="w-full flex items-center justify-between p-4 bg-white/10 hover:bg-white/20 rounded-2xl transition-all group/btn"
               >
                 <span className="text-sm font-bold">Mover p/ Concluída</span>
@@ -355,6 +387,48 @@ export const LeadDetails: React.FC<LeadDetailsProps> = ({ onViewChange, user, le
           </div>
         </div>
       </div>
+      {confirmModal.isOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-800 animate-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
+                  confirmModal.type === 'danger' ? 'bg-rose-100 text-rose-600' :
+                  confirmModal.type === 'warning' ? 'bg-amber-100 text-amber-600' :
+                  'bg-blue-100 text-blue-600'
+                }`}>
+                  <AlertCircle size={24} />
+                </div>
+                <button onClick={() => setConfirmModal(prev => ({...prev, isOpen: false}))} className="p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">
+                  <X size={20} />
+                </button>
+              </div>
+              
+              <h2 className="text-xl font-headline font-bold text-slate-900 dark:text-slate-50 mb-2">{confirmModal.title}</h2>
+              <p className="text-slate-500 text-sm leading-relaxed mb-8">{confirmModal.message}</p>
+              
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => setConfirmModal(prev => ({...prev, isOpen: false}))}
+                  className="flex-1 py-3 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-bold text-sm transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  onClick={() => { confirmModal.action(); setConfirmModal(prev => ({...prev, isOpen: false})); }}
+                  className={`flex-1 py-3 px-4 text-white rounded-xl font-bold text-sm transition-colors shadow-lg ${
+                    confirmModal.type === 'danger' ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-600/20' :
+                    confirmModal.type === 'warning' ? 'bg-amber-600 hover:bg-amber-700 shadow-amber-600/20' :
+                    'bg-blue-600 hover:bg-blue-700 shadow-blue-600/20'
+                  }`}
+                >
+                  Confirmar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
