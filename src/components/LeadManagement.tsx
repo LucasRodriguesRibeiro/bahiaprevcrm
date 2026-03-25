@@ -201,11 +201,14 @@ export const LeadManagement: React.FC<LeadManagementProps> = ({ onViewChange, in
                   leads.map((lead) => (
                     <tr key={lead.id} className="hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors group">
                       <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
+                        <div 
+                          className="flex items-center gap-3 cursor-pointer"
+                          onClick={() => onViewLead ? onViewLead(lead) : onViewChange('lead-details')}
+                        >
                           <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 font-bold text-sm">
                             {lead.name.charAt(0)}
                           </div>
-                          <span className="font-bold text-slate-900 dark:text-slate-50 group-hover:text-blue-600 transition-colors">{lead.name}</span>
+                          <span className="font-bold text-slate-900 dark:text-slate-50 group-hover:text-blue-600 hover:underline transition-all">{lead.name}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4">

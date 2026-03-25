@@ -18,9 +18,10 @@ import { supabase } from '../lib/supabase';
 
 interface WaitingPaymentProps {
   onViewChange: (view: View) => void;
+  onViewLead?: (lead: Lead) => void;
 }
 
-export const WaitingPayment: React.FC<WaitingPaymentProps> = ({ onViewChange }) => {
+export const WaitingPayment: React.FC<WaitingPaymentProps> = ({ onViewChange, onViewLead }) => {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
@@ -177,11 +178,14 @@ export const WaitingPayment: React.FC<WaitingPaymentProps> = ({ onViewChange }) 
                     return (
                       <tr key={lead.id} className="hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors group">
                         <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
+                          <div 
+                            className="flex items-center gap-3 cursor-pointer"
+                            onClick={() => onViewLead ? onViewLead(lead) : onViewChange('lead-details')}
+                          >
                             <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 font-bold text-sm">
                               {lead.name.charAt(0)}
                             </div>
-                            <span className="font-bold text-slate-900 dark:text-slate-50 group-hover:text-emerald-600 transition-colors">{lead.name}</span>
+                            <span className="font-bold text-slate-900 dark:text-slate-50 group-hover:text-emerald-600 hover:underline transition-all">{lead.name}</span>
                           </div>
                         </td>
                         <td className="px-6 py-4">
