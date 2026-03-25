@@ -160,31 +160,22 @@ export default function App() {
     );
   }
 
+  // Removido temporariamente o bloqueio de erro de inicialização em desenvolvimento
+  /*
   if (initError) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-red-50 p-6 text-center">
-        <AlertCircle size={64} className="text-red-600 mb-6" />
-        <h1 className="text-3xl font-bold text-red-900 mb-4">Erro de Inicialização</h1>
-        <p className="text-red-700 mb-8 max-w-md">
-          Não foi possível conectar ao servidor. Por favor, verifique se as chaves do Supabase estão configuradas corretamente.
-        </p>
-        <div className="bg-white p-4 rounded border border-red-200 mb-8 font-mono text-sm text-red-800">
-          {initError}
-        </div>
-        <button 
-          onClick={() => window.location.reload()}
-          className="px-8 py-3 bg-red-600 text-white rounded-full font-bold hover:bg-red-700 shadow-lg transition-all"
-        >
-          Tentar Novamente
-        </button>
-      </div>
+      // ...
     );
   }
+  */
 
+  // Removida temporariamente a tela de login
+  /*
   if (!session) {
     console.log("App: Renderizando Login");
     return <Login />;
   }
+  */
 
   return (
     <ErrorBoundary>
