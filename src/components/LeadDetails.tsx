@@ -153,12 +153,31 @@ export const LeadDetails: React.FC<LeadDetailsProps> = ({ onViewChange, user, le
 
   const handleStatusChange = async (newStatus: string) => {
     if (!lead?.id) return;
+    const oldStatus = currentStatus;
+    
+    if (oldStatus === newStatus) return;
+
     try {
       setCurrentStatus(newStatus); // Atualização otimista da UI
       const { error } = await supabase.from('leads').update({ status: newStatus }).eq('id', lead.id);
       if (error) throw error;
+
+      // Sincronizar com Vendas Concluídas
+      if (newStatus === 'concluida' && oldStatus !== 'concluida') {
+        await supabase
+          .from('sales')
+          .insert([{
+            client_name: leadName,
+            contract_number: `BP-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
+            value: lead.plan === 'Esmeralda' ? 40 : lead.plan === 'Diamante' ? 45 : 65,
+            plan_type: lead.plan,
+            lead_id: lead.id
+          }]);
+      } else if (newStatus !== 'concluida' && oldStatus === 'concluida') {
+        await supabase.from('sales').delete().eq('lead_id', lead.id);
+      }
     } catch (error: any) {
-      setCurrentStatus(lead?.status || 'novo'); // Reverter em caso de erro
+      setCurrentStatus(oldStatus); // Reverter em caso de erro
       alert('Erro ao atualizar status: ' + error.message);
     }
   };
