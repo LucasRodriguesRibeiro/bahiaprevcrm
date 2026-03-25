@@ -9,6 +9,7 @@ import {
   Trash2, 
   ChevronLeft, 
   ChevronRight,
+  ChevronDown,
   UserPlus,
   Loader2,
   MessageSquare
@@ -71,8 +72,11 @@ export const LeadManagement: React.FC<LeadManagementProps> = ({ onViewChange, in
     }
   };
 
-  const handleUpdateStatus = async (id: string, newStatus: string) => {
+  const handleUpdateStatus = async (id: string, newStatus: string, oldStatus: string) => {
     try {
+      // Optimistic UI Update
+      setLeads(prev => prev.map(l => l.id === id ? { ...l, status: newStatus as Lead['status'] } : l));
+
       const { error } = await supabase
         .from('leads')
         .update({ status: newStatus })
@@ -80,8 +84,9 @@ export const LeadManagement: React.FC<LeadManagementProps> = ({ onViewChange, in
 
       if (error) throw error;
       
-      if (newStatus === 'concluida') {
-        const lead = leads.find(l => l.id === id);
+      const lead = leads.find(l => l.id === id);
+      
+      if (newStatus === 'concluida' && oldStatus !== 'concluida') {
         if (lead) {
           await supabase
             .from('sales')
@@ -93,21 +98,27 @@ export const LeadManagement: React.FC<LeadManagementProps> = ({ onViewChange, in
               lead_id: lead.id
             }]);
         }
+      } else if (newStatus !== 'concluida' && oldStatus === 'concluida') {
+        if (lead) {
+          await supabase.from('sales').delete().eq('lead_id', lead.id);
+        }
       }
-      
-      fetchLeads();
     } catch (error: any) {
+      // Revert optimistic update
+      setLeads(prev => prev.map(l => l.id === id ? { ...l, status: oldStatus as Lead['status'] } : l));
       alert('Erro ao atualizar status: ' + error.message);
     }
   };
 
-  const getStatusBadge = (id: string, status: Lead['status']) => {
+  const StatusDropdown = ({ lead }: { lead: Lead }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    
     const statusColors: Record<string, string> = {
-      novo: 'bg-blue-100 text-blue-600',
-      atendimento: 'bg-amber-100 text-amber-600',
-      pagamento: 'bg-emerald-100 text-emerald-600',
-      'sem-resposta': 'bg-rose-100 text-rose-600',
-      concluida: 'bg-slate-100 text-slate-600',
+      novo: 'bg-blue-100/50 text-blue-600 border-blue-200 hover:bg-blue-100',
+      atendimento: 'bg-amber-100/50 text-amber-600 border-amber-200 hover:bg-amber-100',
+      pagamento: 'bg-emerald-100/50 text-emerald-600 border-emerald-200 hover:bg-emerald-100',
+      'sem-resposta': 'bg-rose-100/50 text-rose-600 border-rose-200 hover:bg-rose-100',
+      concluida: 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200',
     };
 
     const statusLabels: Record<string, string> = {
@@ -119,15 +130,40 @@ export const LeadManagement: React.FC<LeadManagementProps> = ({ onViewChange, in
     };
 
     return (
-      <select 
-        value={status}
-        onChange={(e) => handleUpdateStatus(id, e.target.value)}
-        className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border-none focus:ring-0 cursor-pointer ${statusColors[status] || 'bg-slate-100 text-slate-600'}`}
-      >
-        {Object.keys(statusLabels).map((key) => (
-          <option key={key} value={key}>{statusLabels[key]}</option>
-        ))}
-      </select>
+      <div className="relative inline-block text-left w-36">
+        <button 
+          onClick={() => setIsOpen(!isOpen)}
+          className={`px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest flex items-center justify-between gap-2 border w-full transition-all outline-none ${statusColors[lead.status] || 'bg-slate-100 text-slate-600'}`}
+        >
+          {statusLabels[lead.status] || 'Novo'}
+          <ChevronDown size={14} className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+        </button>
+        {isOpen && (
+          <>
+            <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)}></div>
+            <div className="absolute right-0 mt-2 w-48 rounded-2xl shadow-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 z-50 overflow-hidden isolate">
+              {Object.keys(statusLabels).map(key => (
+                <button
+                  key={key}
+                  onClick={() => {
+                    setIsOpen(false);
+                    if (key !== lead.status) {
+                      handleUpdateStatus(lead.id, key, lead.status);
+                    }
+                  }}
+                  className={`w-full text-left px-4 py-3 text-xs font-bold uppercase tracking-widest border-l-4 transition-all flex items-center gap-2
+                  ${key === lead.status ? 'bg-slate-50 dark:bg-slate-800 border-blue-500' : 'border-transparent hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+                >
+                  <span className={`w-2 h-2 rounded-full ${statusColors[key].split(' ')[1].replace('text-', 'bg-')}`}></span>
+                  <span className={`${statusColors[key].split(' ')[1]}`}>
+                    {statusLabels[key]}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
     );
   };
 
@@ -235,7 +271,7 @@ export const LeadManagement: React.FC<LeadManagementProps> = ({ onViewChange, in
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        {getStatusBadge(lead.id, lead.status)}
+                        <StatusDropdown lead={lead} />
                       </td>
                       <td className="px-6 py-4 text-sm font-medium text-slate-500">
                         {lead.created_at ? new Date(lead.created_at).toLocaleDateString('pt-BR') : 'N/A'}
